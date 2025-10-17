@@ -1,0 +1,80 @@
+import { employees } from "../data/employees";
+
+export type Employee = {
+  id: number;
+  name: string;
+  position: string;
+  department: string;
+  email: string;
+  phone: string;
+  branchId: number;
+};
+
+export function list(): Employee[] {
+  return employees;
+}
+
+export function getById(id: number): Employee | undefined {
+  return employees.find(e => e.id === id);
+}
+
+export function create(payload: Omit<Employee, "id">): Employee {
+  const nextId = Math.max(0, ...employees.map(e => e.id)) + 1;
+  const emp: Employee = { id: nextId, ...payload };
+  employees.push(emp);
+  return emp;
+}
+
+export function update(
+  id: number,
+  patch: Partial<Omit<Employee, "id">>
+): Employee | undefined {
+  const idx = employees.findIndex(e => e.id === id);
+  if (idx === -1) return undefined;
+  employees[idx] = { ...employees[idx], ...patch, id };
+  return employees[idx];
+}
+
+export function remove(id: number): boolean {
+  const idx = employees.findIndex(e => e.id === id);
+  if (idx === -1) return false;
+  employees.splice(idx, 1);
+  return true;
+}
+
+export function listByBranchId(branchId: number): Employee[] {
+  return employees.filter(e => e.branchId === branchId);
+}
+
+export function listByDepartment(department: string): Employee[] {
+  const d = department.toLowerCase();
+  return employees.filter(e => e.department.toLowerCase() === d);
+}
+
+export const listByBranch = listByBranchId;
+
+export function listEmployees(): Employee[] {
+  return list();
+}
+
+export function getEmployee(id: number): Employee | undefined {
+  return getById(id);
+}
+
+export function getEmployeesByBranch(branchId: number): Employee[] {
+  return listByBranchId(branchId);
+}
+
+export function getEmployeesByDepartment(department: string): Employee[] {
+  return listByDepartment(department);
+}
+
+export function updateEmployee(
+  id: number,
+  body: Partial<Omit<Employee, "id">>
+): Employee | undefined {
+  return update(id, body);
+}
+export function getAll(): Employee[] {
+  throw new Error("Function not implemented.");
+}
