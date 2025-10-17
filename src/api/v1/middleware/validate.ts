@@ -3,16 +3,14 @@ import { Request, Response, NextFunction } from "express";
 
 export const validate = (
   schema: Joi.ObjectSchema,
-  property: "body" | "query" | "params" = "body") => {
+  part: "body" | "query" | "params" = "body") => {
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const value = schema.validateAsync(req[property], {
+      const value = schema.validateAsync(req[part], {
         abortEarly: false,
         stripUnknown: true,
       });
-
-      req[property] = value;
-
+      req[part] = value;
       next();
     } catch (error: any) {
       res.status(400).json({
