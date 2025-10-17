@@ -16,8 +16,8 @@ app.get("/health", (req, res) => {
 });
 
 // Route handlers
-app.use("/api/v1", employeeRoutes);
-app.use("/api/v1", branchRoutes);
+app.use("/api/v1/employees", employeeRoutes);
+app.use("/api/v1/branches", branchRoutes);
 
 export default app;
 

@@ -1,4 +1,7 @@
 import express, { Router } from "express";
+import * as branchController from '../controllers/branch.controller';
+
+
 import {
   getAllEmployees,
   createEmployee,
@@ -9,11 +12,12 @@ import {
 
 const router: Router = express.Router();
 
-router.get("/employees", getAllEmployees);
-router.post("/employees", createEmployee);
-router.put("/employees/:id", updateEmployee);
-router.delete("/employees/:id", deleteEmployee);
-router.get("/employees/:id", getEmployeeById);
+router.get("/", getAllEmployees);
+router.post("/", createEmployee);
+router.put("/:id", updateEmployee);
+router.delete("/:id", deleteEmployee);
+router.get("/:id", getEmployeeById);
+router.post('/', branchController.createBranch);
 
 export default router;
 

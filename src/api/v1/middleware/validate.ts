@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 export const validate = (
   schema: Joi.ObjectSchema,
   part: "body" | "query" | "params" = "body") => {
-  (req: Request, res: Response, next: NextFunction) => {
+  return async(req: Request, res: Response, next: NextFunction) => {
     try {
       const value = schema.validateAsync(req[part], {
         abortEarly: false,

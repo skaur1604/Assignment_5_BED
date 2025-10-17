@@ -1,7 +1,6 @@
 import express, { Router } from "express";
-import * as employeeController from '../controllers/employee.controller';
-import { validate } from "../middleware/validate";
-import { createEmployeeSchema } from "../Validation/employeeValidation";
+import { validate } from '../middleware/validate';
+import { createEmployeeSchema } from '../Validation/employeeValidation';
 
 import {
   getAllEmployees,
@@ -13,14 +12,11 @@ import {
 
 const router: Router = express.Router();
 
-router.get("/employees", getAllEmployees);
-router.post("/employees", createEmployee);
-router.put("/employees/:id", updateEmployee);
-router.delete("/employees/:id", deleteEmployee);
-router.get("/employees/:id", getEmployeeById);
-
-router.post('/create', employeeController.createEmployee);
-
+router.get("/", getAllEmployees);
+router.get("/:id", getEmployeeById);
+router.post("/", validate(createEmployeeSchema), createEmployee);
+router.put("/:id", updateEmployee);
+router.delete("/:id", deleteEmployee);
 
 
 export default router;
