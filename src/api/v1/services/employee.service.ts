@@ -14,7 +14,7 @@ export function list(): Employee[] {
   return employees;
 }
 
-export function getById(id: number): Employee | undefined {
+export function getById(id: number){
   return employees.find(e => e.id === id);
 }
 
@@ -76,5 +76,10 @@ export function updateEmployee(
   return update(id, body);
 }
 export function getAll(): Employee[] {
-  throw new Error("Function not implemented.");
+  return list();
 }
+
+export function byBranch(branchId: number): Employee[] {
+  return listByBranchId(branchId);
+}
+

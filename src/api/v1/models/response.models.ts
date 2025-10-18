@@ -14,3 +14,14 @@ export const successResponse = <T>(
     data,
     message,
 });
+
+export const errorResponse = (
+  message: string = "An error occurred",
+  code?: string,
+  error?: string
+): ApiResponse<null> => ({
+  status: "error",
+  message,
+  code,
+  error,
+});
