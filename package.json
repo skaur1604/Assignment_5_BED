@@ -310,8 +310,8 @@
     "yocto-queue": "^0.1.0"
   },
   "scripts": {
-  "start": "ts-node src/server.ts",
-  "test": "jest"
+    "start": "ts-node src/server.ts",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
