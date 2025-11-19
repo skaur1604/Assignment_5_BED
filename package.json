@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "jest.config.js",
-  "directories": {
-    "test": "test"
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "generate-docs": "ts-node src/docs/generate.ts",
+    "test": "jest"
   },
+
   "dependencies": {
     "accepts": "^2.0.0",
     "acorn": "^8.15.0",
@@ -313,10 +316,7 @@
     "yn": "^3.1.1",
     "yocto-queue": "^0.1.0"
   },
-  "scripts": {
-    "start": "ts-node src/server.ts",
-    "test": "jest"
-  },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/skaur1604/BED_Assignment_02.git"
