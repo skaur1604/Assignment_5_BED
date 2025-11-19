@@ -3,4 +3,5 @@ dist
 coverage
 .env
 Service_Key.json
+.env
 
