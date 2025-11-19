@@ -1,17 +1,57 @@
 import { Router } from "express";
-import * as employeeCtrl from "../controllers/employee.controller";
-import { runValidation } from "../middleware/Validate"; 
-import { createEmployeeSchema, updateEmployeeSchema } from "../validation/employee.schema";
+import * as employeeController from "../controllers/employee.controller";
 
-const employeeRouter = Router();
+const router = Router();
 
+/**
+ * @openapi
+ * /api/v1/employees:
+ *   get:
+ *     summary: Get all employees
+ *     responses:
+ *       200:
+ *         description: List of employees
+ */
+router.get("/", employeeController.getAllEmployees);
 
-employeeRouter.post("/", runValidation(createEmployeeSchema), employeeCtrl.createEmployee);
-employeeRouter.get("/", employeeCtrl.getAllEmployees);
-employeeRouter.get("/:id", employeeCtrl.getEmployeeById);
-employeeRouter.put("/:id", runValidation(updateEmployeeSchema), employeeCtrl.updateEmployee);
-employeeRouter.delete("/:id", employeeCtrl.deleteEmployee);
-employeeRouter.get("/branch/:branchId", employeeCtrl.getEmployeesForBranch);
-employeeRouter.get("/department/:department", employeeCtrl.getEmployeesByDepartment);
+/**
+ * @openapi
+ * /api/v1/employees:
+ *   post:
+ *     summary: Create a new employee
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Employee'
+ *     responses:
+ *       201:
+ *         description: Employee created successfully
+ */
+router.post("/", employeeController.createEmployee);
 
-export default employeeRouter;
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Employee:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: John Doe
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: john@example.com
+ *         department:
+ *           type: string
+ *           example: HR
+ */
+
+export default router;
+
