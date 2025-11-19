@@ -9,7 +9,12 @@
     "strict": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": "src",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@api/*": ["api/v1/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["test", "node_modules", "dist"]
