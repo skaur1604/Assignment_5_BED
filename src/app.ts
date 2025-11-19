@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
+import cors from "cors";
 
 import employeeRoutes from "./api/v1/routes/employee.routes";
 import branchRoutes from "./api/v1/routes/branch.routes";
@@ -25,6 +26,14 @@ app.get("/health", (req, res) => {
 });
 app.use("/api/v1/employees", employeeRoutes);
 app.use("/api/v1/branches", branchRoutes);
+
+app.use(
+  cors({
+    origin: ["https://your-frontend.com", "http://localhost:5000"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 export default app;
 

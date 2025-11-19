@@ -327,6 +327,7 @@
   },
   "homepage": "https://github.com/skaur1604/BED_Assignment_02#readme",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",
     "@types/morgan": "^1.9.10",
