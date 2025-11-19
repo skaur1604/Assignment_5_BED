@@ -1,85 +1,80 @@
-import { employees } from "../data/employees";
+import { Employee as FireEmployee } from "../models/employeeModel";
+import {
+  createDocument,
+  getDocuments,
+  getDocumentById,
+  updateDocument,
+  deleteDocument,
+} from "../repositories/firestoreRepository";
 
-export type Employee = {
-  id: number;
-  name: string;
-  position: string;
-  department: string;
-  email: string;
-  phone: string;
-  branchId: number;
+const COLLECTION = "employees";
+
+type EmployeeNoId = Omit<FireEmployee, "id">;
+export type FireNewEmployee = Omit<FireEmployee, "id" | "createdAt" | "updatedAt">;
+
+const toStringId = (id: string | number) => String(id);
+
+export const getAll = async (): Promise<FireEmployee[]> => {
+  const snap = await getDocuments(COLLECTION);
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as EmployeeNoId) }));
 };
 
-export function list(): Employee[] {
-  return employees;
-}
+export const getById = async (id: string | number): Promise<FireEmployee | undefined> => {
+  const doc = await getDocumentById(COLLECTION, toStringId(id));
+  if (!doc) return undefined;
+  return { id: doc.id, ...(doc.data() as EmployeeNoId) };
+};
 
-export function getById(id: number){
-  return employees.find(e => e.id === id);
-}
+export const create = async (data: FireNewEmployee): Promise<FireEmployee> => {
+  const now = new Date().toISOString();
+  const newId = await createDocument<EmployeeNoId>(COLLECTION, {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  });
+  const created = await getDocumentById(COLLECTION, newId);
+  if (!created) throw new Error("Failed to create employee");
+  return { id: newId, ...(created.data() as EmployeeNoId) };
+};
 
-export function create(payload: Omit<Employee, "id">): Employee {
-  const nextId = Math.max(0, ...employees.map(e => e.id)) + 1;
-  const emp: Employee = { id: nextId, ...payload };
-  employees.push(emp);
-  return emp;
-}
+export const update = async (
+  id: string | number,
+  updates: Partial<FireNewEmployee>
+): Promise<FireEmployee | null> => {
+  const docId = toStringId(id);
+  const existing = await getDocumentById(COLLECTION, docId);
+  if (!existing) return null;
 
-export function update(
-  id: number,
-  patch: Partial<Omit<Employee, "id">>
-): Employee | undefined {
-  const idx = employees.findIndex(e => e.id === id);
-  if (idx === -1) return undefined;
-  employees[idx] = { ...employees[idx], ...patch, id };
-  return employees[idx];
-}
+  await updateDocument<EmployeeNoId>(COLLECTION, docId, {
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  });
 
-export function remove(id: number): boolean {
-  const idx = employees.findIndex(e => e.id === id);
-  if (idx === -1) return false;
-  employees.splice(idx, 1);
+  const updated = await getDocumentById(COLLECTION, docId);
+  if (!updated) return null;
+  return { id: updated.id, ...(updated.data() as EmployeeNoId) };
+};
+
+export const remove = async (id: string | number): Promise<boolean> => {
+  const docId = toStringId(id);
+  const existing = await getDocumentById(COLLECTION, docId);
+  if (!existing) return false;
+  await deleteDocument(COLLECTION, docId);
   return true;
-}
+};
 
-export function listByBranchId(branchId: number): Employee[] {
-  return employees.filter(e => e.branchId === branchId);
-}
+export const byBranch = async (branchId: string | number): Promise<FireEmployee[]> => {
+  const snap = await getDocuments(COLLECTION);
+  const target = toStringId(branchId);
+  return snap.docs
+    .map((d) => ({ id: d.id, ...(d.data() as EmployeeNoId) }))
+    .filter((e) => String(e.branchId) === target);
+};
 
-export function listByDepartment(department: string): Employee[] {
-  const d = department.toLowerCase();
-  return employees.filter(e => e.department.toLowerCase() === d);
-}
-
-export const listByBranch = listByBranchId;
-
-export function listEmployees(): Employee[] {
-  return list();
-}
-
-export function getEmployee(id: number): Employee | undefined {
-  return getById(id);
-}
-
-export function getEmployeesByBranch(branchId: number): Employee[] {
-  return listByBranchId(branchId);
-}
-
-export function getEmployeesByDepartment(department: string): Employee[] {
-  return listByDepartment(department);
-}
-
-export function updateEmployee(
-  id: number,
-  body: Partial<Omit<Employee, "id">>
-): Employee | undefined {
-  return update(id, body);
-}
-export function getAll(): Employee[] {
-  return list();
-}
-
-export function byBranch(branchId: number): Employee[] {
-  return listByBranchId(branchId);
-}
-
+export const byDepartment = async (dept: string): Promise<FireEmployee[]> => {
+  const snap = await getDocuments(COLLECTION);
+  const target = (dept || "").toLowerCase();
+  return snap.docs
+    .map((d) => ({ id: d.id, ...(d.data() as EmployeeNoId) }))
+    .filter((e) => (e.department || "").toLowerCase() === target);
+};

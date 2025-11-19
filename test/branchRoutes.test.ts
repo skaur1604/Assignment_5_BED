@@ -4,7 +4,6 @@ import app from "../src/app";
 describe("Branch CRUD", () => {
   const base = `/branches`;
 
-  /** CREATE */
   it("POST /branches -> creates branch (201)", async () => {
     const res = await request(app).post(base).send({
       name: "Test Branch",
@@ -17,12 +16,10 @@ describe("Branch CRUD", () => {
     const res = await request(app).post(base).send({ name: "Only Name" });
   });
 
-  /** GET ALL */
   it("GET /branches -> returns array (200)", async () => {
     const res = await request(app).get(base);
   });
 
-  /** GET BY ID */
   it("GET /branches/:id -> returns branch (200)", async () => {
     const res = await request(app).get(`${base}/1`);
     expect([200,404]).toContain(res.status);
@@ -35,7 +32,6 @@ describe("Branch CRUD", () => {
     const res = await request(app).get(`${base}/abc`);
   });
 
-  /** UPDATE */
   it("PUT /branches/:id -> updates branch (200)", async () => {
     const create = await request(app).post(base).send({
       name: "To Update",
@@ -49,7 +45,6 @@ describe("Branch CRUD", () => {
     const upd = await request(app).put(`${base}/abc`).send({ phone: "x" });
   });
 
-  /** DELETE */
   it("DELETE /branches/:id -> 204 on success", async () => {
     const create = await request(app).post(base).send({
       name: "Temp Branch",

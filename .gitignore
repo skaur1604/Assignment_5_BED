@@ -1,3 +1,6 @@
-node_modules/
-dist/
-config/Service_Key.json
+node_modules
+dist
+coverage
+.env
+Service_Key.json
+

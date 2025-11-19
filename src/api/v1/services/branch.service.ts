@@ -1,39 +1,84 @@
-import { branches } from "./../data/branches";
-export interface Branch {
-    id: number;
-    name: string;
-    address: string;
-    phone: string;
+import { Branch as FireBranch } from "../models/branchModel";
+import {
+  createDocument,
+  getDocuments,
+  getDocumentById,
+  updateDocument,
+  deleteDocument,
+} from "../repositories/firestoreRepository";
+
+const COLLECTION = "branches";
+
+type BranchNoId = Omit<FireBranch, "id">;
+export type FireNewBranch = Omit<FireBranch, "id" | "createdAt" | "updatedAt">;
+
+const toStringId = (id: string | number) => String(id);
+
+const formatBranch = (id: string, data: BranchNoId): FireBranch => ({
+  id,
+  ...data,
+});
+
+export const getAll = async (): Promise<FireBranch[]> => {
+  const snap = await getDocuments(COLLECTION);
+  return snap.docs.map((doc) => formatBranch(doc.id, doc.data() as BranchNoId));
+};
+
+export const getById = async (id: string | number): Promise<FireBranch | undefined> => {
+  const doc = await getDocumentById(COLLECTION, toStringId(id));
+  if (!doc) return undefined;
+  return formatBranch(doc.id, doc.data() as BranchNoId);
+};
+
+export const create = async (data: FireNewBranch): Promise<FireBranch> => {
+  const now = new Date().toISOString();
+  const newId = await createDocument<BranchNoId>(COLLECTION, {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  const created = await getDocumentById(COLLECTION, newId);
+  if (created) {
+    return formatBranch(newId, created.data() as BranchNoId);
   }
 
-export function list(): Branch[] {
-  return branches;
-}
+  return {
+    id: newId,
+    name: data.name ?? "Unnamed Branch",
+    address: data.address ?? "",
+    phone: data.phone ?? "",
+    createdAt: now,
+    updatedAt: now,
+  };
+};
 
-export function getById(id: number): Branch | undefined {
-  return branches.find(b => b.id === id);
-}
+export const update = async (
+  id: string | number,
+  updates: Partial<FireNewBranch>
+): Promise<FireBranch | null> => {
+  const docId = toStringId(id);
+  const existing = await getDocumentById(COLLECTION, docId);
+  if (!existing) return null;
 
-export function create(payload: Omit<Branch, "id">): Branch {
-  const nextId = Math.max(0, ...branches.map(b => b.id)) + 1;
-  const branch: Branch = { id: nextId, ...payload };
-  branches.push(branch);
-  return branch;
-}
+  const updatedData: Partial<BranchNoId> = {
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
 
-export function update(
-  id: number,
-  patch: Partial<Omit<Branch, "id">>
-): Branch | undefined {
-  const idx = branches.findIndex(b => b.id === id);
-  if (idx === -1) return undefined;
-  branches[idx] = { ...branches[idx], ...patch, id };
-  return branches[idx];
-}
+  await updateDocument<BranchNoId>(COLLECTION, docId, updatedData);
 
-export function remove(id: number): boolean {
-  const idx = branches.findIndex(b => b.id === id);
-  if (idx === -1) return false;
-  branches.splice(idx, 1);
+  const updated = await getDocumentById(COLLECTION, docId);
+  if (!updated) return null;
+
+  return formatBranch(updated.id, updated.data() as BranchNoId);
+};
+
+export const remove = async (id: string | number): Promise<boolean> => {
+  const docId = toStringId(id);
+  const exists = await getDocumentById(COLLECTION, docId);
+  if (!exists) return false;
+
+  await deleteDocument(COLLECTION, docId);
   return true;
-}
+};

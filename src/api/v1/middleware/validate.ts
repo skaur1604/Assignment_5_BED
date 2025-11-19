@@ -1,23 +1,24 @@
 import Joi from "joi";
-import { Request, Response, NextFunction } from "express";
+import { RequestHandler } from "express";
 
-export const validate = (
-  schema: Joi.ObjectSchema,
-  part: "body" | "query" | "params" = "body") => {
-  return async(req: Request, res: Response, next: NextFunction) => {
+export const runValidation =
+  (schema: Joi.ObjectSchema, target: "body" | "query" | "params" = "body"): RequestHandler =>
+  async (req, res, next) => {
     try {
-      const value = schema.validateAsync(req[part], {
+      const cleanedData = await schema.validateAsync(req[target], {
         abortEarly: false,
         stripUnknown: true,
       });
-      req[part] = value;
+      req[target] = cleanedData as any;
+
       next();
-    } catch (error: any) {
+    } catch (validationErr: any) {
+      const issues = validationErr?.details?.map((item: any) => item.message) || [];
+
       res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: error.details.map((detail: any) => detail.message),
+        ok: false,
+        message: "Request data did not pass validation",
+        issues,
       });
     }
   };
-};

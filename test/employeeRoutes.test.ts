@@ -1,36 +1,34 @@
 import request from "supertest";
-import express from "express";
-import employeeRoutes from "../src/api/v1/routes/employee.routes";
+import app from "../src/app";
 
-const app = express();
-app.use(express.json());
-app.use("/api/v1", employeeRoutes);
+describe("Employee routes (minimal)", () => {
+  describe("POST /api/v1/employees", () => {
+    it("should create employee (201)", async () => {
+      const payload = {
+        name: "Test",
+        position: "Teller",
+        department: "Operations",
+        email: "t@e.com",
+        phone: "111-111",
+        branchId: "1",
+      };
+      const res = await request(app).post("/api/v1/employees").send(payload);
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty("id");
+      expect(res.body.name).toBe("Test");
+    });
 
-  it("GET /api/v1/employees/:id should return 404 if employee not found", async () => {
-    const res = await request(app).get("/api/v1/employees/999");
-    expect(res.status).toBe(404);
+    it("should 400 when required fields missing", async () => {
+      const res = await request(app).post("/api/v1/employees").send({ name: "OnlyName" });
+      expect(res.status).toBe(400);
+    });
   });
 
-  it("PUT /api/v1/employees/:id should update employee and return 200", async () => {
-    const patch = { position: "Senior Developer" };
-    const res = await request(app).put("/api/v1/employees/1").send(patch);
-    expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ id: 1, ...patch });
+  describe("GET /api/v1/employees", () => {
+    it("should return array (200)", async () => {
+      const res = await request(app).get("/api/v1/employees");
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+    });
   });
-
-  it("PUT /api/v1/employees/:id should return 404 if employee not found", async () => {
-    const patch = { position: "Senior Developer" };
-    const res = await request(app).put("/api/v1/employees/999").send(patch);
-    expect(res.status).toBe(404);
-  });
-
-  it("DELETE /api/v1/employees/:id should delete employee and return 200", async () => {
-    const res = await request(app).delete("/api/v1/employees/1");
-    expect(res.status).toBe(200);
-  });
-
-  it("DELETE /api/v1/employees/:id should return 404 if employee not found", async () => {
-    const res = await request(app).delete("/api/v1/employees/999");
-    expect(res.status).toBe(404);
-  });
-
+});

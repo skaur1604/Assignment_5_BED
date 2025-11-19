@@ -1,54 +1,97 @@
 import { Request, Response } from "express";
-import * as svc from "../services/branch.service";
+import { HTTP_STATUS } from "../constants/httpConstants";
+import * as branchService from "../services/branch.service";
 
-export const getAllBranches = (req: Request, res: Response) => {
-  const branches = svc.list();
-  res.status(200).json({ data: branches });
+export const createBranch = async (req: Request, res: Response) => {
+  try {
+    const branch = await branchService.create(req.body);
+    return res.status(HTTP_STATUS.CREATED).json(branch);
+  } catch (err) {
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ error: "Could not create branch" });
+  }
 };
 
-export const getBranchById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return res.status(400).json({ message: "Missing or invalid id parameter" });
+export const getAllBranches = async (_req: Request, res: Response) => {
+  try {
+    const branches = await branchService.getAll();
+    return res.status(HTTP_STATUS.OK).json(branches);
+  } catch (err) {
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ error: "Could not retrieve branches" });
   }
-  const branch = svc.getById(id);
-  if (!branch) {
-    return res.status(404).json({ message: "Branch not found" });
-  }
-  res.status(200).json({ data: branch });
 };
 
-export const createBranch = (req: Request, res: Response) => {
-  const { name, address, phone } = req.body ?? {};
-  if (!name || !address || !phone) {
-    return res.status(400).json({ message: "Missing required fields" });
+export const getBranchById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: "Branch id is required" });
+    }
+
+    const branch = await branchService.getById(id);
+    if (!branch) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: "Branch not found" });
+    }
+
+    return res.status(HTTP_STATUS.OK).json(branch);
+  } catch (err) {
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch branch" });
   }
-  const newBranch = svc.create({ name, address, phone });
-  res.status(201).json({ message: "Branch created", data: newBranch });
 };
 
-export const updateBranch = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return res.status(400).json({ message: "Missing or invalid id parameter" });
+export const updateBranch = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: "Branch id is required" });
+    }
+
+    const updated = await branchService.update(id, req.body);
+    if (!updated) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: "Branch not found" });
+    }
+
+    return res.status(HTTP_STATUS.OK).json(updated);
+  } catch (err) {
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update branch" });
   }
-  const patch = { ...(req.body ?? {}) };
-  if (patch.id !== undefined) delete patch.id;
-  const updated = svc.update(id, patch);
-  if (!updated) {
-    return res.status(404).json({ message: "Branch not found" });
-  }
-  res.status(200).json({ message: "Branch updated", data: updated });
 };
 
-export const deleteBranch = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return res.status(400).json({ message: "Missing or invalid id parameter" });
+export const deleteBranch = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: "Branch id is required" });
+    }
+
+    const deleted = await branchService.remove(id);
+    if (!deleted) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: "Branch not found" });
+    }
+
+    return res.status(HTTP_STATUS.OK).json({ message: "Branch deleted successfully" });
+  } catch (err) {
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to delete branch" });
   }
-  const deleted = svc.remove(id);
-  if (!deleted) {
-    return res.status(404).json({ message: "Branch not found" });
-  }
-  res.status(200).json({ message: "Branch deleted" });
-}; 
+};

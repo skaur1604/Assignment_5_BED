@@ -1,8 +1,6 @@
 import express, { Express } from "express";
 import morgan from "morgan";
 
-
-// Import routes
 import employeeRoutes from "./api/v1/routes/employee.routes";
 import branchRoutes from "./api/v1/routes/branch.routes";
 
@@ -15,7 +13,6 @@ app.get("/health", (req, res) => {
   res.status(200).send("Server is healthy");
 });
 
-// Route handlers
 app.use("/api/v1/employees", employeeRoutes);
 app.use("/api/v1/branches", branchRoutes);
 

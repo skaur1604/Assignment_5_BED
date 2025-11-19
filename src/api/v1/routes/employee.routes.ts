@@ -1,25 +1,17 @@
-import express, { Router } from "express";
-import { validate } from '../middleware/validate';
-import { createEmployeeSchema } from '../Validation/employeeValidation';
+import { Router } from "express";
+import * as employeeCtrl from "../controllers/employee.controller";
+import { runValidation } from "../middleware/Validate"; 
+import { createEmployeeSchema, updateEmployeeSchema } from "../validation/employee.schema";
 
-import {
-  getAllEmployees,
-  createEmployee,
-  updateEmployee,
-  deleteEmployee,
-  getEmployeeById,
-} from "../controllers/employee.controller";
-
-const router: Router = express.Router();
-
-router.get("/", getAllEmployees);
-router.get("/:id", getEmployeeById);
-router.post("/", validate(createEmployeeSchema), createEmployee);
-router.put("/:id", updateEmployee);
-router.delete("/:id", deleteEmployee);
+const employeeRouter = Router();
 
 
-export default router;
+employeeRouter.post("/", runValidation(createEmployeeSchema), employeeCtrl.createEmployee);
+employeeRouter.get("/", employeeCtrl.getAllEmployees);
+employeeRouter.get("/:id", employeeCtrl.getEmployeeById);
+employeeRouter.put("/:id", runValidation(updateEmployeeSchema), employeeCtrl.updateEmployee);
+employeeRouter.delete("/:id", employeeCtrl.deleteEmployee);
+employeeRouter.get("/branch/:branchId", employeeCtrl.getEmployeesForBranch);
+employeeRouter.get("/department/:department", employeeCtrl.getEmployeesByDepartment);
 
-
-
+export default employeeRouter;
